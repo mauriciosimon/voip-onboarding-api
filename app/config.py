@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # FreePBX
     freepbx_host: str
-    freepbx_api_token: str
+    freepbx_api_password: str
     freepbx_api_user: str = "admin"
 
     # SIP Domain (for client config)

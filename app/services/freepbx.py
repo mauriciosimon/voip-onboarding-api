@@ -16,12 +16,12 @@ class FreePBXService:
     """Service to interact with FreePBX REST API"""
 
     def __init__(self):
-        self.base_url = f"{settings.freepbx_host}/admin/api/api/rest.php"
+        self.base_url = f"{settings.freepbx_host}/admin/api/api/rest.php/rest"
         self.headers = {
             "Content-Type": "application/json",
         }
-        # FreePBX REST API uses token-based auth
-        self.auth = (settings.freepbx_api_user, settings.freepbx_api_token)
+        # FreePBX REST API uses basic auth (user + password)
+        self.auth = (settings.freepbx_api_user, settings.freepbx_api_password)
 
     @staticmethod
     def generate_sip_password(length: int = 16) -> str:
