@@ -11,3 +11,7 @@ ENV/
 *.egg-info/
 dist/
 build/
+
+# SSH keys (keep local only)
+*.ppk
+freepbx_key

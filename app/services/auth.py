@@ -70,17 +70,3 @@ def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
     if not verify_password(password, user.hashed_password):
         return None
     return user
-
-
-def get_next_extension(db: Session) -> str:
-    """Get the next available extension number"""
-    last_user = db.query(User).order_by(User.id.desc()).first()
-
-    if last_user and last_user.sip_extension:
-        try:
-            last_ext = int(last_user.sip_extension)
-            return str(last_ext + 1)
-        except ValueError:
-            pass
-
-    return str(settings.extension_start)

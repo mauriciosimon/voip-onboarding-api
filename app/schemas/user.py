@@ -7,6 +7,8 @@ from typing import Optional
 class UserRegister(BaseModel):
     email: EmailStr
     password: str
+    sip_extension: str  # Extension created manually in FreePBX
+    sip_password: str   # SIP password from FreePBX
 
 
 class UserLogin(BaseModel):

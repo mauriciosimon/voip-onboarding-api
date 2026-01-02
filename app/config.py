@@ -11,18 +11,15 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expiration_minutes: int = 1440  # 24 hours
 
-    # FreePBX
+    # FreePBX/SSH Configuration
     freepbx_host: str
-    freepbx_api_password: str
-    freepbx_api_user: str = "admin"
+    ssh_user: str = "root"
+    ssh_key_path: str = "freepbx_key"
 
     # SIP Domain (for client config)
     sip_domain: str
     sip_port: int = 5060
     sip_transport: str = "udp"
-
-    # Extension numbering
-    extension_start: int = 1000
 
     class Config:
         env_file = ".env"
