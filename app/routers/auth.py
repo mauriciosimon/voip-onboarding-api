@@ -91,15 +91,14 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Get client IP and add to firewall
+    # Get client IP and add to firewall (with 2-hour expiration)
     client_ip = get_client_ip(request)
 
     if client_ip and client_ip != "unknown":
         try:
-            await firewall_service.trust_ip(client_ip)
+            await firewall_service.trust_ip(client_ip, db, user_id=user.id)
         except FirewallError as e:
             # Log error but don't fail login
-            # In production, use proper logging
             print(f"Warning: Failed to whitelist IP {client_ip}: {e}")
 
     access_token = create_access_token(data={"sub": str(user.id)})

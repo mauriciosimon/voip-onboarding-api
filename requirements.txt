@@ -8,3 +8,4 @@ python-dotenv==1.0.0
 asyncssh==2.22.0
 pydantic[email]==2.5.3
 pydantic-settings==2.1.0
+apscheduler==3.10.4

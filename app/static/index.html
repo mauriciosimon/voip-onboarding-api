@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoIP Access</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            color: #1a1a2e;
+            font-size: 28px;
+            text-align: center;
+        }
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        button {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Loading state */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .loading.show {
+            display: block;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-text {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Success state */
+        .success {
+            display: none;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .success.show {
+            display: block;
+        }
+        .success-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: scaleIn 0.3s ease-out;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+        .success-icon svg {
+            width: 35px;
+            height: 35px;
+            fill: white;
+        }
+        .success-title {
+            color: #28a745;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .success-message {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Error state */
+        .error {
+            display: none;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .error.show {
+            display: block;
+        }
+
+        /* Form visibility */
+        .login-form.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>VoIP Access</h1>
+        <p class="subtitle">Ingresa para habilitar tu acceso al servicio</p>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="login-form">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="tu@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" required>
+            </div>
+            <button type="submit">Ingresar</button>
+        </form>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p class="loading-text">Agregando IP a la lista de IP's permitidas...</p>
+        </div>
+
+        <!-- Success State -->
+        <div id="success" class="success">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </div>
+            <div class="success-title">¡Listo!</div>
+            <p class="success-message">Puedes usar tu SIP phone</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        const API_URL = '';
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const form = document.getElementById('loginForm');
+            const loading = document.getElementById('loading');
+            const success = document.getElementById('success');
+            const error = document.getElementById('error');
+
+            // Hide error, show loading
+            error.className = 'error';
+            form.className = 'login-form hidden';
+            loading.className = 'loading show';
+
+            const data = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+
+            try {
+                const res = await fetch(API_URL + '/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+
+                // Small delay for better UX
+                await new Promise(r => setTimeout(r, 500));
+
+                loading.className = 'loading';
+
+                if (res.ok) {
+                    success.className = 'success show';
+                } else {
+                    form.className = 'login-form';
+                    error.textContent = result.detail || 'Error al iniciar sesión';
+                    error.className = 'error show';
+                }
+            } catch (err) {
+                loading.className = 'loading';
+                form.className = 'login-form';
+                error.textContent = 'Error de conexión. Intenta de nuevo.';
+                error.className = 'error show';
+            }
+        });
+    </script>
+</body>
+</html>
