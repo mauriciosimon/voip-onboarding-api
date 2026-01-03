@@ -15,19 +15,32 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 def get_client_ip(request: Request) -> str:
-    """Extract client IP from request"""
+    """Extract client IPv4 from request"""
+    ip = None
+
     # Check X-Forwarded-For header (for proxies/load balancers)
     forwarded = request.headers.get("X-Forwarded-For")
     if forwarded:
-        return forwarded.split(",")[0].strip()
-
+        ip = forwarded.split(",")[0].strip()
     # Check X-Real-IP header
-    real_ip = request.headers.get("X-Real-IP")
-    if real_ip:
-        return real_ip
-
+    elif request.headers.get("X-Real-IP"):
+        ip = request.headers.get("X-Real-IP")
     # Fall back to direct client IP
-    return request.client.host if request.client else "unknown"
+    elif request.client:
+        ip = request.client.host
+
+    if not ip:
+        return "unknown"
+
+    # Convert IPv6-mapped IPv4 to pure IPv4 (e.g., ::ffff:192.168.1.1 -> 192.168.1.1)
+    if ip.startswith("::ffff:"):
+        ip = ip.replace("::ffff:", "")
+
+    # Skip pure IPv6 addresses, only allow IPv4
+    if ":" in ip:
+        return "unknown"
+
+    return ip
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
