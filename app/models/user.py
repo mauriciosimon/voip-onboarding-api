@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from app.database import Base
 
 
@@ -13,6 +14,10 @@ class User(Base):
     # SIP Extension info
     sip_extension = Column(String, unique=True, nullable=False)
     sip_password = Column(String, nullable=False)
+
+    # SSH Account (FreePBX connection)
+    account_id = Column(Integer, ForeignKey("ssh_accounts.id"), nullable=True)
+    ssh_account = relationship("SSHAccount", back_populates="users")
 
     # Metadata
     is_active = Column(Boolean, default=True)

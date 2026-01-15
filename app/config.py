@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     sip_port: int = 5060
     sip_transport: str = "udp"
 
+    # Admin Configuration
+    admin_password: str
+
     class Config:
         env_file = ".env"
 

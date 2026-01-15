@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - VoIP</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            color: #1a1a2e;
+            font-size: 28px;
+        }
+        h2 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        button {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,123,255,0.4);
+        }
+        button.danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+        button.danger:hover {
+            box-shadow: 0 4px 15px rgba(220,53,69,0.4);
+        }
+        button.success {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+        }
+        .error.show {
+            display: block;
+        }
+        .success-msg {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+        }
+        .success-msg.show {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header h2 {
+            margin: 0;
+            border: none;
+            padding: 0;
+        }
+        .logout-btn {
+            background: #6c757d;
+            font-size: 13px;
+            padding: 8px 16px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: #e9ecef;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #495057;
+        }
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #b6d4fe;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        .welcome-text {
+            color: #666;
+            font-size: 14px;
+        }
+        .welcome-text strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Setup Card (first time) -->
+        <div id="setupCard" class="card hidden">
+            <h1>Configuracion Inicial</h1>
+            <p class="subtitle">Crea el primer usuario administrador</p>
+            <div id="setupError" class="error"></div>
+            <form id="setupForm">
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="setupUsername" placeholder="admin" required>
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="setupPassword" placeholder="Contraseña segura" required>
+                </div>
+                <button type="submit">Crear Administrador</button>
+            </form>
+        </div>
+
+        <!-- Login Card -->
+        <div id="loginCard" class="card hidden">
+            <h1>Admin Panel</h1>
+            <p class="subtitle">Ingresa tus credenciales de administrador</p>
+            <div id="loginError" class="error"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="adminUsername" placeholder="Usuario" required>
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="adminPassword" placeholder="Contraseña" required>
+                </div>
+                <button type="submit">Ingresar</button>
+            </form>
+        </div>
+
+        <!-- Dashboard (hidden by default) -->
+        <div id="dashboard" class="hidden">
+            <!-- Header -->
+            <div class="card">
+                <div class="header">
+                    <div>
+                        <h1>Panel de Administracion</h1>
+                        <p class="welcome-text">Conectado como: <strong id="currentUser">-</strong></p>
+                    </div>
+                    <button class="logout-btn" onclick="logout()">Salir</button>
+                </div>
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('accounts')">Cuentas SSH</button>
+                    <button class="tab" onclick="showTab('users')">Usuarios</button>
+                    <button class="tab" onclick="showTab('ips')">IPs Permitidas</button>
+                    <button class="tab" onclick="showTab('admins')">Administradores</button>
+                </div>
+            </div>
+
+            <!-- SSH Accounts Tab -->
+            <div id="tab-accounts" class="tab-content active">
+                <div class="card">
+                    <h2>Nueva Cuenta SSH</h2>
+                    <div class="info-box">
+                        Las cuentas SSH se usan para conectar con servidores FreePBX y gestionar el firewall.
+                    </div>
+                    <div id="accountError" class="error"></div>
+                    <div id="accountSuccess" class="success-msg"></div>
+                    <form id="createAccountForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                <input type="text" id="accountName" placeholder="Produccion PBX" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Host</label>
+                                <input type="text" id="accountHost" placeholder="pbx.example.com" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Usuario SSH</label>
+                                <input type="text" id="accountUser" placeholder="root" value="root" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Ruta de la llave SSH</label>
+                                <input type="text" id="accountKeyPath" placeholder="freepbx_key" required>
+                            </div>
+                        </div>
+                        <button type="submit">Crear Cuenta</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="header">
+                        <h2>Cuentas SSH</h2>
+                        <button onclick="loadAccounts()">Actualizar</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Host</th>
+                                <th>Usuario</th>
+                                <th>Llave</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accountsBody">
+                            <tr><td colspan="6">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="tab-users" class="tab-content">
+                <div class="card">
+                    <h2>Crear Usuario</h2>
+                    <div id="createError" class="error"></div>
+                    <div id="createSuccess" class="success-msg"></div>
+                    <form id="createUserForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="newEmail" placeholder="usuario@email.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Contraseña</label>
+                                <input type="password" id="newPassword" placeholder="Contraseña" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Extension SIP</label>
+                                <input type="text" id="newExtension" placeholder="1001" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Contraseña SIP</label>
+                                <input type="text" id="newSipPassword" placeholder="sip-password" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Cuenta SSH (FreePBX)</label>
+                            <select id="newAccountId">
+                                <option value="">-- Sin cuenta asignada --</option>
+                            </select>
+                        </div>
+                        <button type="submit">Crear Usuario</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="header">
+                        <h2>Usuarios</h2>
+                        <button onclick="loadUsers()">Actualizar</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Extension</th>
+                                <th>Cuenta</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersBody">
+                            <tr><td colspan="6">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- IPs Tab -->
+            <div id="tab-ips" class="tab-content">
+                <div class="card">
+                    <div class="header">
+                        <h2>IPs Permitidas</h2>
+                        <button onclick="loadTrustedIPs()">Actualizar</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>IP</th>
+                                <th>Usuario ID</th>
+                                <th>Creada</th>
+                                <th>Expira</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ipsBody">
+                            <tr><td colspan="4">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Admins Tab -->
+            <div id="tab-admins" class="tab-content">
+                <div class="card">
+                    <h2>Nuevo Administrador</h2>
+                    <div id="adminCreateError" class="error"></div>
+                    <div id="adminCreateSuccess" class="success-msg"></div>
+                    <form id="createAdminForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Usuario</label>
+                                <input type="text" id="newAdminUsername" placeholder="admin2" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Contraseña</label>
+                                <input type="password" id="newAdminPassword" placeholder="Contraseña" required>
+                            </div>
+                        </div>
+                        <button type="submit">Crear Administrador</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="header">
+                        <h2>Administradores</h2>
+                        <button onclick="loadAdmins()">Actualizar</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuario</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminsBody">
+                            <tr><td colspan="3">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '';
+        let adminUser = '';
+        let adminPass = '';
+        let accounts = [];
+
+        // Check for stored credentials or if setup is needed
+        async function initialize() {
+            // Check if we have stored credentials from login page
+            const storedUser = sessionStorage.getItem('adminUser');
+            const storedPass = sessionStorage.getItem('adminPass');
+
+            if (storedUser && storedPass) {
+                // Verify credentials are still valid
+                try {
+                    const res = await fetch(API_URL + '/admin/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: storedUser, password: storedPass })
+                    });
+
+                    if (res.ok) {
+                        adminUser = storedUser;
+                        adminPass = storedPass;
+                        document.getElementById('dashboard').classList.remove('hidden');
+                        document.getElementById('currentUser').textContent = adminUser;
+                        loadDashboard();
+                        return;
+                    }
+                } catch (err) {
+                    // Credentials invalid, clear and show login
+                    sessionStorage.removeItem('adminUser');
+                    sessionStorage.removeItem('adminPass');
+                }
+            }
+
+            // No valid stored credentials, check if setup is needed
+            checkSetup();
+        }
+
+        // Check if setup is needed
+        async function checkSetup() {
+            try {
+                const res = await fetch(API_URL + '/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: '', password: '' })
+                });
+                const result = await res.json();
+
+                // If we get "Invalid username" it means admins exist
+                if (result.detail === 'Invalid username or password') {
+                    document.getElementById('loginCard').classList.remove('hidden');
+                } else {
+                    // No admins - show setup
+                    document.getElementById('setupCard').classList.remove('hidden');
+                }
+            } catch (err) {
+                document.getElementById('loginCard').classList.remove('hidden');
+            }
+        }
+
+        // Setup form
+        document.getElementById('setupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const error = document.getElementById('setupError');
+            error.classList.remove('show');
+
+            const data = {
+                username: document.getElementById('setupUsername').value,
+                password: document.getElementById('setupPassword').value
+            };
+
+            try {
+                const res = await fetch(API_URL + '/admin/setup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    // Auto login
+                    adminUser = data.username;
+                    adminPass = data.password;
+                    document.getElementById('setupCard').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('currentUser').textContent = adminUser;
+                    loadDashboard();
+                } else {
+                    const result = await res.json();
+                    error.textContent = result.detail || 'Error al crear administrador';
+                    error.classList.add('show');
+                }
+            } catch (err) {
+                error.textContent = 'Error de conexion';
+                error.classList.add('show');
+            }
+        });
+
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            const error = document.getElementById('loginError');
+
+            try {
+                const res = await fetch(API_URL + '/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (res.ok) {
+                    const result = await res.json();
+                    adminUser = username;
+                    adminPass = password;
+                    document.getElementById('loginCard').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('currentUser').textContent = result.username;
+                    loadDashboard();
+                } else {
+                    const result = await res.json();
+                    error.textContent = result.detail || 'Credenciales incorrectas';
+                    error.classList.add('show');
+                }
+            } catch (err) {
+                error.textContent = 'Error de conexion';
+                error.classList.add('show');
+            }
+        });
+
+        // Create account form
+        document.getElementById('createAccountForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const error = document.getElementById('accountError');
+            const success = document.getElementById('accountSuccess');
+            error.classList.remove('show');
+            success.classList.remove('show');
+
+            const data = {
+                name: document.getElementById('accountName').value,
+                host: document.getElementById('accountHost').value,
+                ssh_user: document.getElementById('accountUser').value,
+                ssh_key_path: document.getElementById('accountKeyPath').value
+            };
+
+            try {
+                const res = await fetch(API_URL + '/admin/accounts?admin_user=' + encodeURIComponent(adminUser) + '&admin_pass=' + encodeURIComponent(adminPass), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    success.textContent = 'Cuenta creada: ' + result.name;
+                    success.classList.add('show');
+                    document.getElementById('createAccountForm').reset();
+                    document.getElementById('accountUser').value = 'root';
+                    loadAccounts();
+                } else {
+                    error.textContent = result.detail || 'Error al crear cuenta';
+                    error.classList.add('show');
+                }
+            } catch (err) {
+                error.textContent = 'Error de conexion';
+                error.classList.add('show');
+            }
+        });
+
+        // Create user form
+        document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const error = document.getElementById('createError');
+            const success = document.getElementById('createSuccess');
+            error.classList.remove('show');
+            success.classList.remove('show');
+
+            const accountId = document.getElementById('newAccountId').value;
+            const data = {
+                email: document.getElementById('newEmail').value,
+                password: document.getElementById('newPassword').value,
+                sip_extension: document.getElementById('newExtension').value,
+                sip_password: document.getElementById('newSipPassword').value,
+                account_id: accountId ? parseInt(accountId) : null
+            };
+
+            try {
+                const res = await fetch(API_URL + '/admin/users?admin_user=' + encodeURIComponent(adminUser) + '&admin_pass=' + encodeURIComponent(adminPass), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    success.textContent = 'Usuario creado: ' + result.email;
+                    success.classList.add('show');
+                    document.getElementById('createUserForm').reset();
+                    loadUsers();
+                } else {
+                    error.textContent = result.detail || 'Error al crear usuario';
+                    error.classList.add('show');
+                }
+            } catch (err) {
+                error.textContent = 'Error de conexion';
+                error.classList.add('show');
+            }
+        });
+
+        // Create admin form
+        document.getElementById('createAdminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const error = document.getElementById('adminCreateError');
+            const success = document.getElementById('adminCreateSuccess');
+            error.classList.remove('show');
+            success.classList.remove('show');
+
+            const data = {
+                username: document.getElementById('newAdminUsername').value,
+                password: document.getElementById('newAdminPassword').value
+            };
+
+            try {
+                const res = await fetch(API_URL + '/admin/admin-users?admin_user=' + encodeURIComponent(adminUser) + '&admin_pass=' + encodeURIComponent(adminPass), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    success.textContent = 'Administrador creado: ' + result.username;
+                    success.classList.add('show');
+                    document.getElementById('createAdminForm').reset();
+                    loadAdmins();
+                } else {
+                    error.textContent = result.detail || 'Error al crear administrador';
+                    error.classList.add('show');
+                }
+            } catch (err) {
+                error.textContent = 'Error de conexion';
+                error.classList.add('show');
+            }
+        });
+
+        function logout() {
+            adminUser = '';
+            adminPass = '';
+            sessionStorage.removeItem('adminUser');
+            sessionStorage.removeItem('adminPass');
+            window.location.href = '/';
+        }
+
+        async function loadDashboard() {
+            await loadAccounts();
+            await loadUsers();
+            await loadTrustedIPs();
+            await loadAdmins();
+        }
+
+        async function loadAccounts() {
+            const tbody = document.getElementById('accountsBody');
+            tbody.innerHTML = '<tr><td colspan="6">Cargando...</td></tr>';
+
+            try {
+                const res = await fetch(API_URL + '/admin/accounts?admin_user=' + encodeURIComponent(adminUser) + '&admin_pass=' + encodeURIComponent(adminPass));
+                if (res.ok) {
+                    accounts = await res.json();
+                    updateAccountDropdown();
+
+                    if (accounts.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6">No hay cuentas SSH</td></tr>';
+                    } else {
+                        tbody.innerHTML = accounts.map(a => `
+                            <tr>
+                                <td>${a.id}</td>
+                                <td><strong>${a.name}</strong></td>
+                                <td>${a.host}</td>
+                                <td>${a.ssh_user}</td>
+                                <td>${a.ssh_key_path}</td>
+                                <td><button class="danger" onclick="deleteAccount(${a.id}, '${a.name}')">Eliminar</button></td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="6">Error al cargar</td></tr>';
+            }
+        }
+
+        function updateAccountDropdown() {
+            const select = document.getElementById('newAccountId');
+            select.innerHTML = '<option value="">-- Sin cuenta asignada --</option>' +
+                accounts.map(a => `<option value="${a.id}">${a.name} (${a.host})</option>`).join('');
+        }
+
+        async function loadUsers() {
+            const tbody = document.getElementById('usersBody');
+            tbody.innerHTML = '<tr><td colspan="6">Cargando...</td></tr>';
+
+            try {
+                const res = await fetch(API_URL + '/admin/users?admin_user=' + encodeURIComponent(adminUser) + '&admin_pass=' + encodeURIComponent(adminPass));
+                if (res.ok) {
+                    const users = await res.json();
+                    if (users.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6">No hay usuarios</td></tr>';
+                    } else {
+                        tbody.innerHTML = users.map(u => `
+                            <tr>
+                                <td>${u.id}</td>
+                                <td>${u.email}</td>
+                                <td>${u.sip_extension}</td>
+                                <td>${u.account_name || '<span style="color:#999">-</span>'}</td>
+                                <td><span class="badge ${u.is_active ? 'badge-active' : 'badge-inactive'}">${u.is_active ? 'Activo' : 'Inactivo'}</span></td>
+                                <td><button class="danger" onclick="deleteUser(${u.id}, '${u.email}')">Eliminar</button></td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="6">Error al cargar</td></tr>';
+            }
+        }
+
+        async function loadTrustedIPs() {
+            const tbody = document.getElementById('ipsBody');
+            tbody.innerHTML = '<tr><td colspan="4">Cargando...</td></tr>';
+
+            try {
+                const res = await fetch(API_URL + '/admin/trusted-ips?admin_user=' + encodeURIComponent(adminUser) + '&admin_pass=' + encodeURIComponent(adminPass));
+                if (res.ok) {
+                    const ips = await res.json();
+                    if (ips.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4">No hay IPs registradas</td></tr>';
+                    } else {
+                        tbody.innerHTML = ips.map(ip => `
+                            <tr>
+                                <td>${ip.ip_address}</td>
+                                <td>${ip.user_id || '-'}</td>
+                                <td>${ip.created_at ? new Date(ip.created_at).toLocaleString() : '-'}</td>
+                                <td>${ip.expires_at ? new Date(ip.expires_at).toLocaleString() : '-'}</td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="4">Error al cargar</td></tr>';
+            }
+        }
+
+        async function loadAdmins() {
+            const tbody = document.getElementById('adminsBody');
+            tbody.innerHTML = '<tr><td colspan="3">Cargando...</td></tr>';
+
+            try {
+                const res = await fetch(API_URL + '/admin/admin-users?admin_user=' + encodeURIComponent(adminUser) + '&admin_pass=' + encodeURIComponent(adminPass));
+                if (res.ok) {
+                    const admins = await res.json();
+                    if (admins.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="3">No hay administradores</td></tr>';
+                    } else {
+                        tbody.innerHTML = admins.map(a => `
+                            <tr>
+                                <td>${a.id}</td>
+                                <td><strong>${a.username}</strong></td>
+                                <td><button class="danger" onclick="deleteAdmin(${a.id}, '${a.username}')">Eliminar</button></td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="3">Error al cargar</td></tr>';
+            }
+        }
+
+        async function deleteAccount(id, name) {
+            if (!confirm('Eliminar cuenta SSH "' + name + '"?')) return;
+
+            try {
+                const res = await fetch(API_URL + '/admin/accounts/' + id + '?admin_user=' + encodeURIComponent(adminUser) + '&admin_pass=' + encodeURIComponent(adminPass), {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    loadAccounts();
+                } else {
+                    const result = await res.json();
+                    alert(result.detail || 'Error al eliminar');
+                }
+            } catch (err) {
+                alert('Error de conexion');
+            }
+        }
+
+        async function deleteUser(id, email) {
+            if (!confirm('Eliminar usuario ' + email + '?')) return;
+
+            try {
+                const res = await fetch(API_URL + '/admin/users/' + id + '?admin_user=' + encodeURIComponent(adminUser) + '&admin_pass=' + encodeURIComponent(adminPass), {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    loadUsers();
+                } else {
+                    const result = await res.json();
+                    alert(result.detail || 'Error al eliminar');
+                }
+            } catch (err) {
+                alert('Error de conexion');
+            }
+        }
+
+        async function deleteAdmin(id, username) {
+            if (!confirm('Eliminar administrador "' + username + '"?')) return;
+
+            try {
+                const res = await fetch(API_URL + '/admin/admin-users/' + id + '?admin_user=' + encodeURIComponent(adminUser) + '&admin_pass=' + encodeURIComponent(adminPass), {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    loadAdmins();
+                } else {
+                    const result = await res.json();
+                    alert(result.detail || 'Error al eliminar');
+                }
+            } catch (err) {
+                alert('Error de conexion');
+            }
+        }
+
+        // Initialize
+        initialize();
+    </script>
+</body>
+</html>

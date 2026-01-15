@@ -35,7 +35,7 @@
         .subtitle {
             color: #666;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             font-size: 14px;
         }
         .form-group {
@@ -81,6 +81,37 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+        }
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            color: #666;
+            background: #f8f9fa;
+            border: none;
+            transition: all 0.2s;
+        }
+        .tab:first-child {
+            border-right: 1px solid #e0e0e0;
+        }
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+        .tab:hover:not(.active) {
+            background: #e9ecef;
         }
 
         /* Loading state */
@@ -168,60 +199,145 @@
         .login-form.hidden {
             display: none;
         }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Admin link in success */
+        .admin-link {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .admin-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .admin-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>VoIP Access</h1>
-        <p class="subtitle">Ingresa para habilitar tu acceso al servicio</p>
 
-        <!-- Login Form -->
-        <form id="loginForm" class="login-form">
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="loginEmail" placeholder="tu@email.com" required>
-            </div>
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" id="loginPassword" placeholder="••••••••" required>
-            </div>
-            <button type="submit">Ingresar</button>
-        </form>
-
-        <!-- Loading State -->
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
-            <p class="loading-text">Agregando IP a la lista de IP's permitidas...</p>
+        <!-- Tabs -->
+        <div class="tabs" id="tabsContainer">
+            <button class="tab active" onclick="showTab('user')">Usuario</button>
+            <button class="tab" onclick="showTab('admin')">Administrador</button>
         </div>
 
-        <!-- Success State -->
-        <div id="success" class="success">
-            <div class="success-icon">
-                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        <!-- User Login Tab -->
+        <div id="tab-user" class="tab-content active">
+            <p class="subtitle">Ingresa para habilitar tu acceso al servicio</p>
+
+            <form id="userLoginForm" class="login-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="tu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="********" required>
+                </div>
+                <button type="submit">Ingresar</button>
+            </form>
+
+            <!-- Loading State -->
+            <div id="userLoading" class="loading">
+                <div class="spinner"></div>
+                <p class="loading-text">Agregando IP a la lista de IP's permitidas...</p>
             </div>
-            <div class="success-title">¡Listo!</div>
-            <p class="success-message">Puedes usar tu SIP phone</p>
+
+            <!-- Success State -->
+            <div id="userSuccess" class="success">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                </div>
+                <div class="success-title">Listo!</div>
+                <p class="success-message">Puedes usar tu SIP phone</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="userError" class="error"></div>
         </div>
 
-        <!-- Error State -->
-        <div id="error" class="error"></div>
+        <!-- Admin Login Tab -->
+        <div id="tab-admin" class="tab-content">
+            <p class="subtitle">Acceso al panel de administracion</p>
+
+            <form id="adminLoginForm" class="login-form">
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="adminUsername" placeholder="admin" required>
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="adminPassword" placeholder="********" required>
+                </div>
+                <button type="submit">Ingresar</button>
+            </form>
+
+            <!-- Loading State -->
+            <div id="adminLoading" class="loading">
+                <div class="spinner"></div>
+                <p class="loading-text">Verificando credenciales...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="adminError" class="error"></div>
+        </div>
     </div>
 
     <script>
         const API_URL = '';
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        function showTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab:${tabName === 'user' ? 'first-child' : 'last-child'}`).classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            // Reset forms and states
+            resetUserForm();
+            resetAdminForm();
+        }
+
+        function resetUserForm() {
+            document.getElementById('userLoginForm').classList.remove('hidden');
+            document.getElementById('userLoading').classList.remove('show');
+            document.getElementById('userSuccess').classList.remove('show');
+            document.getElementById('userError').classList.remove('show');
+        }
+
+        function resetAdminForm() {
+            document.getElementById('adminLoginForm').classList.remove('hidden');
+            document.getElementById('adminLoading').classList.remove('show');
+            document.getElementById('adminError').classList.remove('show');
+        }
+
+        // User login
+        document.getElementById('userLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const form = document.getElementById('loginForm');
-            const loading = document.getElementById('loading');
-            const success = document.getElementById('success');
-            const error = document.getElementById('error');
+            const form = document.getElementById('userLoginForm');
+            const loading = document.getElementById('userLoading');
+            const success = document.getElementById('userSuccess');
+            const error = document.getElementById('userError');
+            const tabs = document.getElementById('tabsContainer');
 
-            // Hide error, show loading
-            error.className = 'error';
-            form.className = 'login-form hidden';
-            loading.className = 'loading show';
+            error.classList.remove('show');
+            form.classList.add('hidden');
+            tabs.style.display = 'none';
+            loading.classList.add('show');
 
             const data = {
                 email: document.getElementById('loginEmail').value,
@@ -236,24 +352,68 @@
                 });
 
                 const result = await res.json();
-
-                // Small delay for better UX
                 await new Promise(r => setTimeout(r, 500));
 
-                loading.className = 'loading';
+                loading.classList.remove('show');
 
                 if (res.ok) {
-                    success.className = 'success show';
+                    success.classList.add('show');
                 } else {
-                    form.className = 'login-form';
-                    error.textContent = result.detail || 'Error al iniciar sesión';
-                    error.className = 'error show';
+                    form.classList.remove('hidden');
+                    tabs.style.display = 'flex';
+                    error.textContent = result.detail || 'Error al iniciar sesion';
+                    error.classList.add('show');
                 }
             } catch (err) {
-                loading.className = 'loading';
-                form.className = 'login-form';
-                error.textContent = 'Error de conexión. Intenta de nuevo.';
-                error.className = 'error show';
+                loading.classList.remove('show');
+                form.classList.remove('hidden');
+                tabs.style.display = 'flex';
+                error.textContent = 'Error de conexion. Intenta de nuevo.';
+                error.classList.add('show');
+            }
+        });
+
+        // Admin login
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const form = document.getElementById('adminLoginForm');
+            const loading = document.getElementById('adminLoading');
+            const error = document.getElementById('adminError');
+
+            error.classList.remove('show');
+            form.classList.add('hidden');
+            loading.classList.add('show');
+
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            try {
+                const res = await fetch(API_URL + '/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await res.json();
+
+                loading.classList.remove('show');
+
+                if (res.ok) {
+                    // Store credentials and redirect to admin panel
+                    sessionStorage.setItem('adminUser', username);
+                    sessionStorage.setItem('adminPass', password);
+                    window.location.href = '/admin-panel';
+                } else {
+                    form.classList.remove('hidden');
+                    error.textContent = result.detail || 'Credenciales incorrectas';
+                    error.classList.add('show');
+                }
+            } catch (err) {
+                loading.classList.remove('show');
+                form.classList.remove('hidden');
+                error.textContent = 'Error de conexion. Intenta de nuevo.';
+                error.classList.add('show');
             }
         });
     </script>

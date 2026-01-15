@@ -5,11 +5,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.database import engine, Base
-from app.routers import auth, sip
+from app.routers import auth, sip, admin
 
 # Import models to register them with SQLAlchemy
 from app.models.user import User
 from app.models.trusted_ip import TrustedIP
+from app.models.ssh_account import SSHAccount
+from app.models.admin_user import AdminUser
 
 # Import scheduler
 from app.scheduler import start_scheduler, stop_scheduler
@@ -47,6 +49,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router)
 app.include_router(sip.router)
+app.include_router(admin.router)
 
 # Static files directory
 static_dir = Path(__file__).parent / "static"
@@ -61,6 +64,15 @@ async def root():
     if index_file.exists():
         return FileResponse(str(index_file))
     return {"status": "ok", "service": "voip-onboarding-api"}
+
+
+@app.get("/admin-panel", tags=["Web UI"])
+async def admin_panel():
+    """Serve admin web interface"""
+    admin_file = static_dir / "admin.html"
+    if admin_file.exists():
+        return FileResponse(str(admin_file))
+    return {"error": "Admin interface not found"}
 
 
 @app.get("/health", tags=["Health"])
