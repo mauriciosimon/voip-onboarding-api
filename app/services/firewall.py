@@ -1,5 +1,5 @@
 import asyncssh
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 from sqlalchemy.orm import Session
 from app.config import get_settings
@@ -19,10 +19,20 @@ class FirewallError(Exception):
 class FirewallService:
     """Service to manage FreePBX firewall via SSH"""
 
-    def __init__(self):
-        self.host = settings.freepbx_host.replace("https://", "").replace("http://", "")
-        self.user = settings.ssh_user
-        self.key_path = settings.ssh_key_path
+    def __init__(self, host: Optional[str] = None, user: Optional[str] = None, key_path: Optional[str] = None):
+        # Use provided values or fall back to settings (for backwards compatibility)
+        self.host = (host or settings.freepbx_host or "").replace("https://", "").replace("http://", "")
+        self.user = user or settings.ssh_user
+        self.key_path = key_path or settings.ssh_key_path
+
+    @classmethod
+    def from_ssh_account(cls, account) -> 'FirewallService':
+        """Create FirewallService from an SSHAccount model instance"""
+        return cls(
+            host=account.host,
+            user=account.ssh_user,
+            key_path=account.ssh_key_path
+        )
 
     async def _run_command(self, command: str) -> str:
         """Execute command via SSH"""
@@ -136,5 +146,5 @@ class FirewallService:
             return False
 
 
-# Singleton instance
+# Default instance (may not have SSH configured - use from_ssh_account for user-specific connections)
 firewall_service = FirewallService()

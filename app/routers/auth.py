@@ -9,7 +9,7 @@ from app.services.auth import (
     create_access_token,
     get_user_by_email,
 )
-from app.services.firewall import firewall_service, FirewallError
+from app.services.firewall import FirewallService, FirewallError
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -108,11 +108,16 @@ async def login(
     client_ip = get_client_ip(request)
 
     if client_ip and client_ip != "unknown":
-        try:
-            await firewall_service.trust_ip(client_ip, db, user_id=user.id)
-        except FirewallError as e:
-            # Log error but don't fail login
-            print(f"Warning: Failed to whitelist IP {client_ip}: {e}")
+        # Use user's SSH account if assigned, otherwise skip firewall
+        if user.ssh_account:
+            try:
+                fw_service = FirewallService.from_ssh_account(user.ssh_account)
+                await fw_service.trust_ip(client_ip, db, user_id=user.id)
+            except FirewallError as e:
+                # Log error but don't fail login
+                print(f"Warning: Failed to whitelist IP {client_ip}: {e}")
+        else:
+            print(f"User {user.email} has no SSH account assigned, skipping firewall")
 
     access_token = create_access_token(data={"sub": str(user.id)})
 
